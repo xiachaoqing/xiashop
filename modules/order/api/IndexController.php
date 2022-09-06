@@ -322,7 +322,9 @@ class IndexController extends BasicController
             $orderBy = ['order.created_time' => SORT_DESC];
         } else {
             foreach ($sort as $key => $value) {
-                $orderBy['order.' . $key] = $value === 'ASC' ? SORT_ASC : SORT_DESC;
+                if (!sql_check($key)) {
+                    $orderBy['order.' . $key] = $value === 'ASC' ? SORT_ASC : SORT_DESC;
+                }
             }
         }
 
@@ -417,7 +419,7 @@ class IndexController extends BasicController
         foreach ($result['goods'] as $goods) {
             if ($goods['after']) {
                 foreach ($goods['after'] as $after_v) {
-                    if ($after_v['order_goods_id'] === $goods['id']) {
+                    if ($after_v['order_goods_id'] === $goods['id'] && $after_v['status'] != 201) {
                         $goods['goods_number'] -= $after_v['return_number'];
                         break;
                     }
@@ -739,7 +741,7 @@ class IndexController extends BasicController
                 foreach ($order_goods as &$o_g) {
                     if ($o_g['after']) {
                         foreach ($o_g['after'] as $after_v) {
-                            if ($after_v['order_goods_id'] === $o_g['id']) {
+                            if ($after_v['order_goods_id'] === $o_g['id'] && $after_v['status'] != 201) {
                                 $o_g['goods_number'] -= $after_v['return_number'];
                                 break;
                             }

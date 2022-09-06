@@ -63,16 +63,16 @@ class Upload
      */
     public function image_base64($base64_img, $prefix = '')
     {
-        self::$size = strlen(file_get_contents($base64_img));
-        //图片大小限制
-        if ((self::$size  > self::$image_limit) && ( self::$image_limit > 0) ) {
-            Error('图片不能大于' . (self::$image_limit / 1024 / 1024) . 'MB');
-        }
         if (preg_match('/^(data:\s*image\/(\w+);base64,)/', $base64_img, $result)) {
             //文件后缀
             $ext = $result[2];
             //判断是否是图片
             if (in_array($ext, array('pjpeg', 'jpeg', 'jpg', 'gif', 'bmp', 'png'))) {
+                self::$size = strlen(file_get_contents($base64_img));
+                //图片大小限制
+                if ((self::$size  > self::$image_limit) && ( self::$image_limit > 0) ) {
+                    Error('图片不能大于' . (self::$image_limit / 1024 / 1024) . 'MB');
+                }
                 if ($prefix) {
                     $path = $this->get_url('image/' . $prefix); //获取当日目录
                 } else {
@@ -192,6 +192,7 @@ class Upload
         }
         self::$size = $file->size;
         $ext      = $file->getExtension();
+        $this->validateExt($ext);
         $path     = $this->get_url('video'); //获取当日目录
         self::$path = '/' . $path . '/' . md5(get_sn()) . ".{$ext}"; //设置视频路径
         //本地上传
@@ -309,5 +310,13 @@ class Upload
             'error' => 0,
             'size' => $size,
         ]);
+    }
+
+    private function validateExt($ext)
+    {
+        if (!in_array($ext, ['mp4', 'ogg'])) {
+            Error('不支持的视频类型');
+        }
+        return true;
     }
 }
